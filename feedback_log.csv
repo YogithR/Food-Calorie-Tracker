@@ -1,0 +1,15 @@
+timestamp,image_name,predicted_label,predicted_confidence,corrected_label
+2026-01-19 23:32:54,ch.jpg,baby_back_ribs,0.6295559406280518,grilled_chicken
+2026-01-20 18:35:56,2026-01-20,Lunch,,chicken-biryani-5.jpg,fried_rice,0.4097391664981842,chicken_biryani,200,330.0,15.0,40.0,12.0,
+2026-01-20 18:37:22,2026-01-20,Lunch,chicken biriyani,chicken-biryani-5.jpg,fried_rice,0.4097391664981842,chicken_biryani,200,330.0,15.0,40.0,12.0,This is my lunch meal
+2026-01-20 18:44:50,2026-01-20,Lunch,,chicken-biryani-5.jpg,fried_rice,0.4097391664981842,chicken_fried_rice,200,350.0,18.0,44.0,11.0,
+2026-01-20 18:45:30,2026-01-20,Breakfast,,AvocadoToastwithEggFranceC4x3-bb87e3bbf1944657b7db35f1383fabdb.jpg,croque_madame,0.3309149146080017,french_toast,200,458.0,12.0,56.0,20.0,
+2026-01-20 18:58:01,2026-01-20,Lunch,,chicken-biryani-5.jpg,fried_rice,0.4097391664981842,chicken_fried_rice,200,350.0,18.0,44.0,11.0,
+2026-01-20 18:58:36,2026-01-20,Lunch,Chicken Biriyani,chicken-biryani-5.jpg,fried_rice,0.4097391664981842,chicken_fried_rice,200,350.0,18.0,44.0,11.0,This is the best lunch
+2026-01-21 10:42:11,2026-01-21,Lunch,,chicken-biryani-5.jpg,fried_rice,0.4097391664981842,chicken_fried_rice,200,350.0,18.0,44.0,11.0,
+2026-01-21,Lunch,chicken_biryani,200,330.0,15.0,40.0,12.0,asvaxzc xzc
+2026-01-21,Lunch,croque_madame,200,520.0,24.0,36.0,32.0,dicvav
+2026-01-21,Lunch,chicken_biryani,200,330.0,15.0,40.0,12.0,
+2026-01-21,Lunch,croque_madame,200,520.0,24.0,36.0,32.0,
+2026-01-21,Lunch,avocado_toast,200,390.0,9.0,32.0,26.0,
+2026-01-21,Dinner,chicken_biryani,200,330.0,15.0,40.0,12.0,this is the best
