@@ -89,7 +89,7 @@ Food-Calorie-Tracker/
 
 
 ---
-```bash
+
 ## ▶️ Run the App Locally
 
 ### 1️⃣ Clone the repository
