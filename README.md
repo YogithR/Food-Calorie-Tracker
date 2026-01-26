@@ -110,16 +110,16 @@ streamlit run app.py
 
 ## 🌐 Deployment
 This project is deployed using Streamlit Community Cloud:
-1. Push the project to GitHub
-2.Log in to Streamlit Community Cloud
-3.Click New App
-4.Select the GitHub repository and branch
-   Set app.py as the main file
-6.Deploy and share the generated public URL
+- Push the project to GitHub
+- Log in to Streamlit Community Cloud
+- Click New App
+- Select the GitHub repository and branch
+- Set app.py as the main file
+- Deploy and share the generated public URL
+  
 ---
 
-
-⚠️ Known Limitations
+##⚠️ Known Limitations
 
 - Food-101 dataset does not cover all real-world or regional dishes
 - Portion size is user-entered (not estimated from the image)
@@ -128,8 +128,7 @@ This project is deployed using Streamlit Community Cloud:
 
 ---
 
-
-🚀 Future Enhancements
+##🚀 Future Enhancements
 
 - Fine-tuning the model with regional and custom food datasets
 - Multi-food detection within a single image
