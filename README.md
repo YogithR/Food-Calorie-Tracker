@@ -73,103 +73,69 @@ This design reflects **real-world ML systems** where human feedback improves rel
 
 ---
 
+## 📁 Project Structure
 
-📂 Project Structure
 Food-Calorie-Tracker/
 │
-├── app.py                  # Main Streamlit application
-├── requirements.txt        # Python dependencies
-├── nutrition.csv           # Nutrition values per 100g
-├── feedback_log.csv        # Saved meal history (auto-created)
+├── app.py # Main Streamlit application
+├── requirements.txt # Python dependencies
+├── nutrition.csv # Nutrition values per 100g
+├── feedback_log.csv # Meal history (auto-created)
 │
-├── models/
-│   ├── food101_mobilenetv2.keras   # Trained ML model
-│   └── class_names.txt             # Food class labels
-│
-├── README.md               # Project documentation
-└── .gitignore              # Ignored files (venv, cache, etc.)
+└── models/
+├── food101_mobilenetv2.keras # Trained model
+└── class_names.txt # Class labels
 
-▶️ Run the App Locally
-1️⃣ Clone the repository
+
+---
+
+## ▶️ Run the App Locally
+
+### 1️⃣ Clone the repository
+```bash
 git clone https://github.com/YogithR/Food-Calorie-Tracker.git
 cd Food-Calorie-Tracker
-
 2️⃣ Create and activate a virtual environment (Windows)
 python -m venv venv
 venv\Scripts\activate
-
 3️⃣ Install dependencies
 pip install -r requirements.txt
-
 4️⃣ Run the application
 streamlit run app.py
+Open in browser:
 
-🌐 Deployment (Streamlit Community Cloud)
-
-This project is deployed using Streamlit Community Cloud.
-
-Steps:
+http://localhost:8501
+🌐 Deployment
+This project is deployed using Streamlit Community Cloud:
 
 Push the project to GitHub
 
-Go to https://streamlit.io/cloud
+Log in to Streamlit Community Cloud
 
 Click New App
 
-Select:
+Select the GitHub repository and branch
 
-Repository: Food-Calorie-Tracker
+Set app.py as the main file
 
-Branch: main
-
-Main file path: app.py
-
-Click Deploy
-
-Streamlit automatically installs dependencies from requirements.txt.
-
-⚙️ How It Works
-
-User uploads a food image
-
-Image is preprocessed and passed to the ML model
-
-Model predicts food category (Top-1 & Top-3)
-
-User optionally corrects the predicted label
-
-Nutrition values are fetched from nutrition.csv
-
-Portion size scales calories and macros
-
-Meal details are saved to feedback_log.csv
+Deploy and share the generated public URL
 
 ⚠️ Known Limitations
+Food-101 dataset does not cover all real-world or regional dishes
 
-Food-101 dataset does not cover all regional or mixed dishes
-
-Portion size is user-estimated, not inferred from image
+Portion size is user-entered (not estimated from the image)
 
 Assumes one primary food item per image
 
-Nutrition accuracy depends on the quality of nutrition.csv
+Nutrition accuracy depends on nutrition.csv quality
 
-Feedback data is stored locally (CSV), not a persistent database
+🚀 Future Enhancements
+Fine-tuning the model with regional and custom food datasets
 
-🔮 Future Enhancements (Planned – V2)
+Multi-food detection within a single image
 
-Fine-tuning with regional/custom food datasets
-
-Mapping generic predictions to real-world dishes
-
-Multi-food detection in a single image
-
-Portion estimation using image segmentation
+Portion estimation using food segmentation
 
 Persistent database storage (SQLite / Firebase)
 
-User authentication and profiles
-
 Mobile-first UI optimization
-
-Using feedback data to retrain the model
