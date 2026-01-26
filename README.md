@@ -89,9 +89,9 @@ Food-Calorie-Tracker/
 
 
 ---
-
-## ▶️ Run the App Locally
 ```bash
+## ▶️ Run the App Locally
+
 ### 1️⃣ Clone the repository
 ```bash
 git clone https://github.com/YogithR/Food-Calorie-Tracker.git
