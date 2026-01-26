@@ -74,64 +74,102 @@ This design reflects **real-world ML systems** where human feedback improves rel
 ---
 
 
-## 📁 Project Structure
-
+📂 Project Structure
 Food-Calorie-Tracker/
 │
-├── app.py # Main Streamlit application
-├── requirements.txt # Python dependencies
-├── nutrition.csv # Nutrition values per 100g
-├── feedback_log.csv # Meal history (auto-created)
+├── app.py                  # Main Streamlit application
+├── requirements.txt        # Python dependencies
+├── nutrition.csv           # Nutrition values per 100g
+├── feedback_log.csv        # Saved meal history (auto-created)
 │
-└── models/
-├── food101_mobilenetv2.keras # Trained model
-└── class_names.txt # Class labels
+├── models/
+│   ├── food101_mobilenetv2.keras   # Trained ML model
+│   └── class_names.txt             # Food class labels
+│
+├── README.md               # Project documentation
+└── .gitignore              # Ignored files (venv, cache, etc.)
 
-
----
-
-## ▶️ Run the App Locally
-
-### 1️⃣ Clone the repository
-```bash
+▶️ Run the App Locally
+1️⃣ Clone the repository
 git clone https://github.com/YogithR/Food-Calorie-Tracker.git
 cd Food-Calorie-Tracker
 
-### 2️⃣ Create and activate a virtual environment (Windows)
-```bash
+2️⃣ Create and activate a virtual environment (Windows)
 python -m venv venv
 venv\Scripts\activate
 
-### 3️⃣ Install dependencies
-```bash
+3️⃣ Install dependencies
 pip install -r requirements.txt
 
-### 4️⃣ Run the application
-```bash
+4️⃣ Run the application
 streamlit run app.py
 
-### 🌐 Deployment
-```bash
-This project is deployed using Streamlit Community Cloud:
+🌐 Deployment (Streamlit Community Cloud)
+
+This project is deployed using Streamlit Community Cloud.
+
+Steps:
+
 Push the project to GitHub
-Log in to Streamlit Community Cloud
+
+Go to https://streamlit.io/cloud
+
 Click New App
-Select the GitHub repository and branch
-Set app.py as the main file
-Deploy and share the generated public URL
 
-### ⚠️ Known Limitations
-```bash
-Food-101 dataset does not cover all real-world or regional dishes
-Portion size is user-entered (not estimated from the image)
+Select:
+
+Repository: Food-Calorie-Tracker
+
+Branch: main
+
+Main file path: app.py
+
+Click Deploy
+
+Streamlit automatically installs dependencies from requirements.txt.
+
+⚙️ How It Works
+
+User uploads a food image
+
+Image is preprocessed and passed to the ML model
+
+Model predicts food category (Top-1 & Top-3)
+
+User optionally corrects the predicted label
+
+Nutrition values are fetched from nutrition.csv
+
+Portion size scales calories and macros
+
+Meal details are saved to feedback_log.csv
+
+⚠️ Known Limitations
+
+Food-101 dataset does not cover all regional or mixed dishes
+
+Portion size is user-estimated, not inferred from image
+
 Assumes one primary food item per image
-Nutrition accuracy depends on nutrition.csv quality
 
+Nutrition accuracy depends on the quality of nutrition.csv
 
-### 🚀 Future Enhancements
-```bash
-Fine-tuning the model with regional and custom food datasets
-Multi-food detection within a single image
-Portion estimation using food segmentation
+Feedback data is stored locally (CSV), not a persistent database
+
+🔮 Future Enhancements (Planned – V2)
+
+Fine-tuning with regional/custom food datasets
+
+Mapping generic predictions to real-world dishes
+
+Multi-food detection in a single image
+
+Portion estimation using image segmentation
+
 Persistent database storage (SQLite / Firebase)
+
+User authentication and profiles
+
 Mobile-first UI optimization
+
+Using feedback data to retrain the model
