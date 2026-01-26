@@ -119,7 +119,7 @@ This project is deployed using Streamlit Community Cloud:
   
 ---
 
-##⚠️ Known Limitations
+## ⚠️ Known Limitations
 
 - Food-101 dataset does not cover all real-world or regional dishes
 - Portion size is user-entered (not estimated from the image)
@@ -128,7 +128,7 @@ This project is deployed using Streamlit Community Cloud:
 
 ---
 
-##🚀 Future Enhancements
+## 🚀 Future Enhancements
 
 - Fine-tuning the model with regional and custom food datasets
 - Multi-food detection within a single image
