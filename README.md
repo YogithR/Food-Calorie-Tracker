@@ -93,21 +93,21 @@ Food-Calorie-Tracker/
 ## ▶️ Run the App Locally
 
 ### 1️⃣ Clone the repository
-```bash
+
 git clone https://github.com/YogithR/Food-Calorie-Tracker.git
 cd Food-Calorie-Tracker
 
 ### 2️⃣ Create and activate a virtual environment (Windows)
-```bash
+
 python -m venv venv
 venv\Scripts\activate
 
 ### 3️⃣ Install dependencies
-```bash
+
 pip install -r requirements.txt
 
 ### 4️⃣ Run the application
-```bash
+
 streamlit run app.py
 
 ### 🌐 Deployment
