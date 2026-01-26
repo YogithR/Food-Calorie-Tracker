@@ -106,7 +106,7 @@ pip install -r requirements.txt
 4️⃣ Run the application
 streamlit run app.py
 
-###🌐 Deployment
+###🌐 **Deployment**
 
 This project is deployed using Streamlit Community Cloud:
 Push the project to GitHub
