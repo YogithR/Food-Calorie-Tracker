@@ -91,7 +91,7 @@ Food-Calorie-Tracker/
 ---
 
 ## ▶️ Run the App Locally
-
+```bash
 ### 1️⃣ Clone the repository
 
 git clone https://github.com/YogithR/Food-Calorie-Tracker.git
@@ -111,7 +111,6 @@ pip install -r requirements.txt
 streamlit run app.py
 
 ### 🌐 Deployment
-```bash
 
 This project is deployed using Streamlit Community Cloud:
 Push the project to GitHub
@@ -122,7 +121,6 @@ Set app.py as the main file
 Deploy and share the generated public URL
 
 ### ⚠️ Known Limitations
-```bash
 
 Food-101 dataset does not cover all real-world or regional dishes
 Portion size is user-entered (not estimated from the image)
@@ -131,7 +129,6 @@ Nutrition accuracy depends on nutrition.csv quality
 
 
 ### 🚀 Future Enhancements
-```bash
 
 Fine-tuning the model with regional and custom food datasets
 Multi-food detection within a single image
