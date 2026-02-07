@@ -13,3 +13,7 @@ timestamp,image_name,predicted_label,predicted_confidence,corrected_label
 2026-01-21,Lunch,croque_madame,200,520.0,24.0,36.0,32.0,
 2026-01-21,Lunch,avocado_toast,200,390.0,9.0,32.0,26.0,
 2026-01-21,Dinner,chicken_biryani,200,330.0,15.0,40.0,12.0,this is the best
+2026-01-31,Breakfast,avocado_toast,0,0.0,0.0,0.0,0.0,0.0,
+2026-02-06,Breakfast,avocado_toast_with_omelette,100,215.0,10.5,14.0,13.5,1.0,
+2026-02-07,Breakfast,croque_madame,40,104.0,4.8,7.2,6.4,0.6,
+2026-02-07,Breakfast,croque_madame,40,104.0,4.8,7.2,6.4,0.6,
