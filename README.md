@@ -102,6 +102,9 @@ pip install -r requirements.txt
 
 ### 4️⃣ Run the application 
 streamlit run app.py
+
+### 5️⃣ Website Link: 
+https://food-calorie-tracker-aqkncnfrudkuqhwqebgzqw.streamlit.app/
 ---
 
 ## 🌐 Deployment
