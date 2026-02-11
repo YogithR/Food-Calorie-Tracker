@@ -126,6 +126,7 @@ streamlit run app.py
 
 ### 5️⃣ Website Link: 
 https://food-calorie-tracker-aqkncnfrudkuqhwqebgzqw.streamlit.app/
+
 ---
 
 ## 🌐 Deployment
@@ -137,6 +138,36 @@ This project is deployed using Streamlit Community Cloud:
 - Set app.py as the main file
 - Deploy and share the generated public URL
   
+---
+
+## 🎯 Usage Guide
+
+### Step 1: Upload Food Image
+- Click **"Upload food image"** in the sidebar
+- Select a `.jpg`, `.jpeg`, or `.png` file
+- Image preview appears in the left panel
+
+### Step 2: View Predictions
+- **Predictions Tab**: See top-3 predictions with confidence scores
+- Bar chart visualizes model certainty
+- System may abstain if confidence is low (<30%)
+
+### Step 3: Adjust Settings (Optional)
+- **Portion Size**: Enter grams (0-1000g)
+- **Meal Type**: Select Breakfast/Lunch/Dinner/Snacks
+- **Final Label**: Override model prediction if incorrect
+- **Notes**: Add custom notes (e.g., "homemade", "extra chicken")
+
+### Step 4: View Nutrition
+- **Nutrition Tab**: See calories, protein, carbs, fat, fiber
+- Formula: `(portion_g / 100) × nutrition_per_100g`
+- All calculations are transparent and verifiable
+
+### Step 5: Save to History
+- Click **"Save to Meal History"**
+- Data logged to `feedback_log.csv`
+- Export to CSV for personal tracking
+
 ---
 
 ## ⚠️ Known Limitations
