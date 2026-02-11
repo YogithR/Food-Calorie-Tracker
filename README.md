@@ -87,19 +87,26 @@ This design reflects **real-world ML systems** where human feedback improves rel
 
 ---
 
-## 📁 Project Structure
-
+## 📂 Project Structure
+```
 Food-Calorie-Tracker/
 │
-├── app.py # Main Streamlit application
-├── requirements.txt # Python dependencies
-├── nutrition.csv # Nutrition values per 100g
-├── feedback_log.csv # Meal history (auto-created)
+├── app.py                          # Main Streamlit application (600+ lines)
+├── predict.py                      # Prediction pipeline & abstention logic
+├── ood_detector.py                 # Out-of-distribution detection (V2)
+├── label_mapper.py                 # Label mapping system (V2)
 │
-└── models/
-├── food101_mobilenetv2.keras # Trained model
-└── class_names.txt # Class labels
-
+├── requirements.txt                # Python dependencies
+├── nutrition.csv                   # Nutrition database (124 foods)
+├── feedback_log.csv                # Meal history (auto-created)
+│
+├── models/
+│   ├── food101_mobilenetv2.keras  # Trained model (14 MB)
+│   └── class_names.txt            # 101 food categories
+│
+├── .gitignore                      # Git exclusions
+└── README.md                       # Documentation
+```
 
 ---
 
