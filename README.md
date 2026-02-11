@@ -1,24 +1,13 @@
 # 🍽️ MealSnap AI — Image-Based Food Calorie & Nutrition Tracker
 
 <div align="center">
-
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-Production-success.svg)
 MealSnap AI is an end-to-end machine learning web application that recognizes food items from an uploaded image and estimates calories and macronutrients (protein, carbohydrates, and fat) based on a portion-aware nutrition system.
 The app combines **computer vision**, **deep learning**, and an **explainable nutrition pipeline**, while allowing users to correct model predictions to improve accuracy — making it practical, transparent, and interview-ready.
 **An end-to-end production ML system combining computer vision, deep learning, and explainable AI for real-time food recognition and nutrition tracking.**
-
-[🚀 Live Demo](https://food-calorie-tracker-aqkncnfrudkuqhwqebgzqw.streamlit.app/) 
-
 </div>
----
-
 ## 🌐 Live Demo
 🚀 **Deployed on Streamlit Community Cloud**  
-👉 *(Paste your Streamlit deployment link here)*
+👉(https://food-calorie-tracker-aqkncnfrudkuqhwqebgzqw.streamlit.app/) 
 
 ---
 
