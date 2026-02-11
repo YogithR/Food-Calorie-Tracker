@@ -25,6 +25,18 @@ The app combines **computer vision**, **deep learning**, and an **explainable nu
 
 ---
 
+<td width="50%">
+
+### 🎨 **User Experience**
+- **Instant Recognition**: <300ms inference latency
+- **Smart Suggestions**: AI-powered label mapping
+- **Portion Tracking**: Per-100g scaling with user input
+- **Meal History**: CSV export for long-term tracking
+- **Responsive UI**: Mobile-optimized interface
+</td>
+
+---
+
 ## 🧠 How the System Works
 
 ### 1️⃣ Food Recognition (Computer Vision)
