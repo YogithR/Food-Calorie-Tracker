@@ -5,6 +5,7 @@ MealSnap AI is an end-to-end machine learning web application that recognizes fo
 The app combines **computer vision**, **deep learning**, and an **explainable nutrition pipeline**, while allowing users to correct model predictions to improve accuracy — making it practical, transparent, and interview-ready.
 **An end-to-end production ML system combining computer vision, deep learning, and explainable AI for real-time food recognition and nutrition tracking.**
 </div>
+----
 ## 🌐 Live Demo
 🚀 **Deployed on Streamlit Community Cloud**  
 👉(https://food-calorie-tracker-aqkncnfrudkuqhwqebgzqw.streamlit.app/) 
