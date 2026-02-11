@@ -107,6 +107,44 @@ Food-Calorie-Tracker/
 ├── .gitignore                      # Git exclusions
 └── README.md                       # Documentation
 ```
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.9+ installed
+- 4GB+ RAM (for model inference)
+- Git installed
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/YogithR/Food-Calorie-Tracker.git
+cd Food-Calorie-Tracker
+```
+
+### 2️⃣ Create Virtual Environment
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Mac/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3️⃣ Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Run the Application
+```bash
+streamlit run app.py
+```
+
+### 5️⃣ Open in Browser
+The app will automatically open at `http://localhost:8501`
 
 ---
 
