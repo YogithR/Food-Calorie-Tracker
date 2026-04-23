@@ -41,15 +41,54 @@ CLASS_NAMES_PATH = p("models", "class_names.txt")
 NUTRITION_PATH = p("nutrition.csv")
 FEEDBACK_LOG_PATH = p("feedback_log.csv")
 
-IMAGENET_FOOD_KEYWORDS = (
-    "food", "dish", "plate", "bowl", "pizza", "burger", "sandwich", "hotdog",
-    "pasta", "spaghetti", "noodle", "soup", "salad", "rice", "biryani", "curry",
-    "steak", "meat", "chicken", "fish", "egg", "omelet", "omelette", "bread",
-    "cake", "donut", "doughnut", "cookie", "ice cream", "banana", "apple",
-    "orange", "pineapple", "lemon", "strawberry", "grape", "watermelon",
-    "broccoli", "cabbage", "cauliflower", "corn", "mushroom", "potato", "carrot",
-    "pepper", "avocado", "espresso", "coffee", "tea", "wine", "beer", "milk"
+# Whole-token matches only (substring matching caused false "food" on e.g. plate_rack, unicorn).
+IMAGENET_FOOD_PHRASES = ("ice cream", "hot dog", "egg yolk")
+IMAGENET_FOOD_TOKENS = frozenset(
+    {
+        "pizza", "burger", "sandwich", "hotdog", "burrito", "bagel", "pretzel",
+        "pasta", "spaghetti", "meatloaf", "noodle", "ramen", "soup", "salad", "rice",
+        "steak", "meat", "chicken", "fish", "egg", "omelet", "omelette", "bread", "toast",
+        "cake", "donut", "doughnut", "cookie", "cheese", "broccoli", "cabbage", "cauliflower",
+        "mushroom", "potato", "carrot", "cucumber", "zucchini", "artichoke", "banana", "apple",
+        "orange", "lemon", "strawberry", "grape", "watermelon", "pineapple", "pomegranate",
+        "avocado", "guacamole", "espresso", "coffee", "tea", "wine", "beer", "milk",
+        "icecream", "trifle", "hummus", "cheeseburger", "meatloaf", "lasagna", "burrito",
+        "taco", "sushi", "onion", "garlic", "radish", "spinach", "lettuce", "tomato",
+    }
 )
+# If ImageNet top-5 hits these whole tokens, image is almost certainly not a meal photo.
+IMAGENET_REJECT_TOKENS = frozenset(
+    {
+        "car", "jeep", "minivan", "cab", "racer", "limousine", "convertible", "sports",
+        "schoolbus", "trolleybus", "police", "ambulance", "fire", "garbage", "tow",
+        "trailer", "pickup", "bicycle", "unicycle", "motorcycle", "scooter", "moped",
+        "mountain", "horse", "dog", "cat", "sheep", "cow", "elephant", "zebra", "lion",
+        "tiger", "bear", "pig", "rabbit", "fox", "wolf", "deer", "monkey", "squirrel",
+        "airliner", "warplane", "space", "submarine", "missile", "tank", "revolver",
+        "rifle", "hammer", "paddle", "maypole", "comic", "book", "notebook", "laptop",
+        "desktop", "keyboard", "monitor", "screen", "television", "remote", "cellular",
+        "telephone", "street", "sign", "traffic", "light", "fountain", "dam", "cliff",
+        "volcano", "beacon", "lighthouse", "palace", "monastery", "library", "grocery",
+        "barbershop", "shoe", "sock", "jean", "suit", "mask", "violin", "guitar", "drum",
+        "oboe", "accordion", "slot", "pinwheel", "carousel", "roller", "coaster", "balloon",
+        "parachute", "ski", "snorkel", "bathing", "wreck", "steam", "locomotive", "freight",
+        "barn", "apiary", "henhouse", "boathouse", "church", "mosque", "planetarium",
+        "bus", "van", "wagon", "truck", "train", "minibus", "bulldozer", "tractor",
+        "shopping", "barrel", "crate", "basketball", "soccer", "tennis", "baseball",
+    }
+)
+# Full synset names that include a reject token but are still food (avoid false reject).
+IMAGENET_FOOD_EXCEPTION_LABELS = frozenset(
+    {
+        "hotdog",
+        "hot_dog",
+        "icecream",
+        "ice_cream",
+        "food_truck",
+    }
+)
+# Require at least this ImageNet "food token" score to accept as food-looking.
+IMAGENET_FOOD_SCORE_MIN = 0.32
 
 # ============================================================
 # 4) APP CONFIG
@@ -776,6 +815,8 @@ def is_food_image_with_imagenet(img: Image.Image, gate_model) -> tuple:
     """
     Returns:
         (is_food, reason, food_like_score)
+    Uses whole-token food hits (no substring bugs), reject tokens on ImageNet top-1,
+    and a higher score floor so cars/animals/objects rarely pass as food.
     """
     try:
         x = img.convert("RGB").resize((224, 224))
@@ -787,15 +828,34 @@ def is_food_image_with_imagenet(img: Image.Image, gate_model) -> tuple:
         decoded = tf.keras.applications.mobilenet_v2.decode_predictions(preds, top=5)[0]
         labels = [f"{label} ({score:.2f})" for _, label, score in decoded]
 
+        def _norm_synset(lbl: str) -> str:
+            return lbl.lower().replace("-", "_")
+
         food_like_score = 0.0
         for _, label, score in decoded:
-            readable = label.replace("_", " ").lower()
-            if any(word in readable for word in IMAGENET_FOOD_KEYWORDS):
-                food_like_score = max(food_like_score, float(score))
+            nl = _norm_synset(label)
+            sc = float(score)
+            joined = nl.replace("_", " ")
+            for ph in IMAGENET_FOOD_PHRASES:
+                if ph in joined:
+                    food_like_score = max(food_like_score, sc)
+            for tok in nl.split("_"):
+                if tok and tok in IMAGENET_FOOD_TOKENS:
+                    food_like_score = max(food_like_score, sc)
 
-        is_food = food_like_score >= 0.20
+        top1_nl = _norm_synset(decoded[0][1])
+        top1_sc = float(decoded[0][2])
+        top1_tokens = {t for t in top1_nl.split("_") if t}
+
+        strong_non_food = False
+        if top1_nl not in IMAGENET_FOOD_EXCEPTION_LABELS:
+            if top1_tokens & IMAGENET_REJECT_TOKENS and top1_sc >= 0.12:
+                strong_non_food = True
+
+        is_food = (food_like_score >= IMAGENET_FOOD_SCORE_MIN) and (not strong_non_food)
         reason = (
-            f"ImageNet top-5: {', '.join(labels)} | max food-like score={food_like_score:.2f}"
+            f"ImageNet top-5: {', '.join(labels)} | food-token score={food_like_score:.2f} "
+            f"(min {IMAGENET_FOOD_SCORE_MIN}), strong_non_food={strong_non_food}"
         )
         return is_food, reason, food_like_score
     except Exception as e:
@@ -924,7 +984,12 @@ vision_uncertain = non_food_by_food101 or (not is_food_gate_ok)
 uncertain_detail = f"{food101_reason} · {gate_reason}"
 
 # ---- What to DISPLAY as prediction ----
-display_top1_label = "unknown" if abstain else top1_label
+# Do not show a bogus Food-101 dish name when the vision gate says this is not a food photo.
+display_top1_label = (
+    "unknown"
+    if (abstain or not is_food_gate_ok)
+    else top1_label
+)
 
 # ---- What to USE for nutrition ----
 # Manual label always wins. On auto: require both model confidence AND food-like vision gate.
