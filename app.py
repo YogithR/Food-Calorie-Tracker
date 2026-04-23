@@ -76,21 +76,29 @@ HISTORY_COLUMNS = [
     "notes",
 ]
 
+# Soft teal placeholder (RGB #ECFDF5) for empty image preview — not plain black
+_PREVIEW_PLACEHOLDER = np.broadcast_to(
+    np.uint8([236, 253, 245]), (280, 440, 3)
+).copy()
+
 # ============================================================
 # 5) UI THEME — forced light appearance (ignore OS / Streamlit dark UI)
 # ============================================================
 st.markdown(
     """
 <style>
-/* Design tokens (explicit hex so Streamlit dark theme cannot wash them out) */
+/* Premium light palette (explicit hex; survives Streamlit dark UI variables) */
 :root {
   --ms-primary: #0F766E;
-  --ms-accent: #F97316;
-  --ms-bg: #F9FAFB;
-  --ms-card: #FFFFFF;
-  --ms-text: #111827;
-  --ms-muted: #64748B;
-  --ms-border: #E5E7EB;
+  --ms-primary-dark: #115E59;
+  --ms-teal-soft: #ecfdf5;
+  --ms-accent: #f97316;
+  --ms-accent-soft: #fff7ed;
+  --ms-bg: #f8fafc;
+  --ms-card: #ffffff;
+  --ms-text: #0f172a;
+  --ms-muted: #64748b;
+  --ms-border: #e2e8f0;
 }
 
 /* Prefer light rendering where browsers support it */
@@ -107,12 +115,12 @@ body,
 section[data-testid="stMain"],
 section[data-testid="stMain"] > div,
 [data-testid="stHeader"] {
-  background-color: #F9FAFB !important;
-  color: #111827 !important;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
 .stApp {
-  background: #F9FAFB !important;
+  background: #f8fafc !important;
 }
 
 main .block-container {
@@ -135,7 +143,7 @@ div[data-testid="stMarkdownContainer"] p,
 div[data-testid="stMarkdownContainer"] span,
 div[data-testid="stMarkdownContainer"] li,
 div[data-testid="stCaption"] {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 section[data-testid="stMain"] small,
@@ -147,13 +155,13 @@ div[data-testid="stCaption"] {
 label[data-testid="stWidgetLabel"] p,
 .stWidget label span,
 .stWidget > label {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 /* Sidebar — light card, dark text (no wildcard * color) */
 section[data-testid="stSidebar"] {
-  background-color: #FFFFFF !important;
-  border-right: 1px solid #E5E7EB !important;
+  background-color: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
 }
 section[data-testid="stSidebar"] .block-container {
   background-color: #FFFFFF !important;
@@ -163,7 +171,7 @@ section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] label,
 section[data-testid="stSidebar"] small,
 section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 section[data-testid="stSidebar"] small {
   color: #64748B !important;
@@ -171,79 +179,121 @@ section[data-testid="stSidebar"] small {
 
 /* Custom header HTML — lock contrast */
 .app-header,
-.app-header *:not(.brand-icon):not(.feature-badge) {
-  color: #111827 !important;
+.app-header *:not(.brand-icon):not(.feature-badge):not(.feature-badge--accent) {
+  color: #0f172a !important;
 }
 .app-header .brand-sub {
-  color: #64748B !important;
+  color: #64748b !important;
 }
 .app-header .brand-title {
-  color: #111827 !important;
+  color: #115e59 !important;
+  letter-spacing: -0.03em;
 }
 .app-header .feature-badge {
-  color: #0F766E !important;
-  background: #ecfeff !important;
-  border-color: #c7f2ef !important;
+  color: #115e59 !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+.app-header .feature-badge--accent {
+  color: #c2410c !important;
+  background: #fff7ed !important;
+  border: 1px solid #fed7aa !important;
 }
 
 .app-header {
-  background: #FFFFFF !important;
-  border: 1px solid #E5E7EB !important;
-  border-radius: 16px;
-  padding: 14px 18px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f8fafc 48%, #ffffff 100%) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 18px;
+  padding: 18px 20px 18px 20px;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px -12px rgba(15, 118, 110, 0.15);
   margin-bottom: 22px;
 }
+.app-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0f766e 0%, #14b8a6 55%, #f97316 100%);
+  opacity: 0.95;
+}
 .header-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 .brand-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #0F766E 0%, #115e59 100%);
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #0f766e 0%, #115e59 100%);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff !important;
-  font-size: 22px;
+  font-size: 24px;
+}
+.brand-title {
+  margin: 0 !important;
+  font-size: 1.55rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
 }
 .badge-wrap {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 .feature-badge {
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .ui-card {
-  background: #FFFFFF !important;
-  border: 1px solid #E5E7EB !important;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.06),
+    0 14px 36px -16px rgba(15, 23, 42, 0.12);
+}
+.ui-card:hover {
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.07),
+    0 18px 44px -14px rgba(15, 118, 110, 0.12);
+  transition: box-shadow 0.2s ease;
 }
 .card-title {
-  margin: 0 0 12px 0;
-  color: #111827 !important;
-  font-size: 1.02rem;
-  font-weight: 800;
+  margin: 0 0 14px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #115e59 !important;
+  font-size: 1.08rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
 }
 .muted {
-  color: #64748B !important;
+  color: #64748b !important;
   font-size: 0.9rem;
 }
 
@@ -253,31 +303,43 @@ div[data-testid="stVerticalBlock"] > div:has(.spacer-20) {
 
 /* Metrics */
 div[data-testid="stMetric"] {
-  background: #f8fafc !important;
-  border: 1px solid #E5E7EB !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 14px;
-  padding: 12px;
+  padding: 14px 12px;
 }
 div[data-testid="stMetric"] label,
-div[data-testid="stMetric"] div[data-testid="stMetricValue"],
-div[data-testid="stMetric"] div[data-testid="stMetricLabel"],
+div[data-testid="stMetric"] div[data-testid="stMetricLabel"] {
+  color: #64748b !important;
+}
+div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+  color: #0f766e !important;
+  font-weight: 800 !important;
+}
 div[data-testid="stMetric"] div[data-testid="stMetricDelta"] {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 /* Primary actions — white label on teal */
 button[kind="primary"],
 div.stButton > button,
 div.stDownloadButton > button {
-  background: #0F766E !important;
+  background: linear-gradient(180deg, #0f766e 0%, #115e59 100%) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid rgba(17, 94, 89, 0.35) !important;
   border-radius: 12px !important;
   font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28);
 }
 div.stButton > button:hover,
 div.stDownloadButton > button:hover {
-  filter: brightness(0.95);
+  filter: brightness(1.05);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.35);
+}
+
+/* Nutrition card — subtle orange accent (not a layout change) */
+.ui-card--nutrition {
+  border-left: 4px solid #f97316 !important;
 }
 
 /* ----- Widget shells (Streamlit wraps Base Web in data-testid blocks) ----- */
@@ -287,8 +349,8 @@ div[data-testid="stTextInput"] [data-baseweb="input"],
 div[data-testid="stTextInput"] [data-baseweb="base-input"],
 div[data-testid="stTextInput"] [data-baseweb="base-input"] > div {
   background-color: #ffffff !important;
-  color: #111827 !important;
-  border-color: #E5E7EB !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
 }
 
 div[data-testid="stTextArea"],
@@ -297,8 +359,8 @@ div[data-testid="stTextArea"] [data-baseweb="textarea"],
 div[data-testid="stTextArea"] [data-baseweb="base-input"],
 div[data-testid="stTextArea"] [data-baseweb="base-input"] > div {
   background-color: #ffffff !important;
-  color: #111827 !important;
-  border-color: #E5E7EB !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
 }
 
 div[data-testid="stNumberInput"],
@@ -307,15 +369,15 @@ div[data-testid="stNumberInput"] [data-baseweb="input"],
 div[data-testid="stNumberInput"] [data-baseweb="base-input"],
 div[data-testid="stNumberInput"] [data-baseweb="base-input"] > div {
   background-color: #ffffff !important;
-  color: #111827 !important;
-  border-color: #E5E7EB !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
 }
 
 div[data-testid="stSelectbox"],
 div[data-testid="stSelectbox"] > div,
 div[data-testid="stSelectbox"] [data-baseweb="select"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 div[data-testid="stFileUploader"],
@@ -323,7 +385,7 @@ div[data-testid="stFileUploader"] > div,
 div[data-testid="stFileUploader"] section,
 div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 /* Base Web primitives (used inside many widgets) */
@@ -331,7 +393,7 @@ div[data-baseweb="input"],
 div[data-baseweb="textarea"],
 div[data-baseweb="base-input"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 /* Inputs — always light field, dark text */
@@ -342,30 +404,42 @@ textarea,
 input[type="text"],
 input[type="number"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  caret-color: #111827 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f766e !important;
   border-radius: 12px !important;
-  border: 1px solid #E5E7EB !important;
+  border: 1px solid #e2e8f0 !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.stTextInput input:focus,
+.stTextArea textarea:focus,
+.stNumberInput input:focus,
+textarea:focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+  outline: none !important;
+  border-color: #0f766e !important;
+  box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px rgba(15, 118, 110, 0.28) !important;
 }
 
 .stTextArea textarea::placeholder,
 .stTextInput input::placeholder,
 input::placeholder,
 textarea::placeholder {
-  color: #64748B !important;
-  -webkit-text-fill-color: #64748B !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
   opacity: 1 !important;
 }
 
 /* Number input steppers */
 div[data-testid="stNumberInput"] button {
-  background-color: #f8fafc !important;
-  color: #111827 !important;
-  border: 1px solid #E5E7EB !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
 }
 div[data-testid="stNumberInput"] button:hover {
-  background-color: #f1f5f9 !important;
+  background-color: #ecfdf5 !important;
+  border-color: #99f6e4 !important;
 }
 
 /* Selectbox closed control + inner value row */
@@ -373,12 +447,20 @@ div[data-baseweb="select"] > div,
 div[data-baseweb="select"] [role="combobox"],
 div[data-baseweb="select"] [aria-selected="true"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+div[data-baseweb="select"] > div:hover {
+  border-color: #cbd5e1 !important;
 }
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] div[role="combobox"],
 div[data-baseweb="select"] p {
-  color: #111827 !important;
+  color: #0f172a !important;
+}
+div[data-baseweb="select"] > div:focus-within {
+  border-color: #0f766e !important;
+  box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px rgba(15, 118, 110, 0.22) !important;
 }
 
 /* Dropdown / listbox — light surface, dark options */
@@ -387,20 +469,20 @@ div[data-baseweb="popover"] > div,
 div[role="listbox"],
 ul[role="listbox"] {
   background-color: #ffffff !important;
-  border: 1px solid #E5E7EB !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 12px !important;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12) !important;
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 div[data-baseweb="popover"] li,
 div[role="option"],
 li[role="option"] {
-  color: #111827 !important;
+  color: #0f172a !important;
   background-color: #ffffff !important;
 }
 div[data-baseweb="popover"] li:hover,
 div[role="option"]:hover {
-  background-color: #f1f5f9 !important;
+  background-color: #ecfdf5 !important;
 }
 
 /* File uploader — all nested text + controls */
@@ -410,47 +492,85 @@ div[data-testid="stFileUploader"] > div,
 div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"],
 div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"] * {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 div[data-testid="stFileUploader"] small,
 div[data-testid="stFileUploader"] p,
 div[data-testid="stFileUploader"] span,
 div[data-testid="stFileUploader"] label,
 div[data-testid="stFileUploader"] button {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 div[data-testid="stFileUploader"] button {
-  background-color: #f8fafc !important;
-  border: 1px solid #E5E7EB !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
 div[data-testid="stFileUploader"] button:hover {
-  background-color: #f1f5f9 !important;
+  background-color: #ecfdf5 !important;
+  border-color: #5eead4 !important;
 }
 div[data-testid="stFileUploader"] div[role="presentation"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 /* Alerts / info — keep Streamlit semantics but ensure body text is dark on light panels */
 div[data-testid="stAlert"] p,
 div[data-testid="stAlert"] div {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 /* Expander / divider labels if present */
 .streamlit-expanderHeader {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
 button[role="tab"] {
   border-radius: 10px !important;
-  border: 1px solid #E5E7EB !important;
-  color: #111827 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
   background-color: #ffffff !important;
 }
 button[role="tab"][aria-selected="true"] {
-  background-color: #ecfeff !important;
-  color: #0f766e !important;
+  background-color: #ecfdf5 !important;
+  color: #115e59 !important;
+  border-color: #99f6e4 !important;
+}
+
+/* Image preview frame */
+.preview-frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 16px;
+  padding: 14px;
+  min-height: 200px;
+  box-sizing: border-box;
+}
+.preview-frame--empty {
+  background: linear-gradient(165deg, #ecfdf5 0%, #f8fafc 50%, #fff7ed 100%) !important;
+  border: 1px dashed #cbd5e1 !important;
+}
+.preview-frame--photo {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%) !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.preview-frame img {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+/* Section helper under titles */
+.section-hint {
+  font-size: 0.88rem;
+  color: #64748b !important;
+  margin: -6px 0 14px 0;
+  line-height: 1.45;
+}
+.section-hint strong {
+  color: #115e59 !important;
+  font-weight: 700;
 }
 </style>
 """,
@@ -474,8 +594,8 @@ st.markdown(
     </div>
     <div class="badge-wrap">
       <span class="feature-badge">Food Recognition</span>
-      <span class="feature-badge">Nutrition Estimate</span>
-      <span class="feature-badge">Meal History</span>
+      <span class="feature-badge feature-badge--accent">Nutrition estimate</span>
+      <span class="feature-badge">Meal history</span>
     </div>
   </div>
 </div>
@@ -486,9 +606,9 @@ st.markdown(
 st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
 st.markdown(
     """
-<div class="muted" style="margin-bottom: 12px;">
-Upload a meal photo, review prediction and nutrition, then save it to history.
-</div>
+<p class="section-hint" style="margin-bottom: 14px !important;">
+  Upload a meal photo, review prediction and nutrition, then save it to your history.
+</p>
 """,
     unsafe_allow_html=True
 )
@@ -697,7 +817,11 @@ left_col, right_col = st.columns([0.38, 0.62], gap="large")
 
 with left_col:
     st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Meal Inputs</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">Meal inputs</h3>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-hint">Portion and labels power nutrition and your saved history.</p>',
+        unsafe_allow_html=True,
+    )
 
     uploaded = st.file_uploader(
         "Upload food image",
@@ -738,16 +862,24 @@ with left_col:
 
 with right_col:
     st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Preview & Analysis</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">Preview & analysis</h3>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-hint">Clear, well-lit photos of a single dish work best.</p>',
+        unsafe_allow_html=True,
+    )
 
     if uploaded is None:
         st.info("Upload an image to start analysis.")
-        st.image(np.zeros((260, 420, 3), dtype=np.uint8), width=420)
+        st.markdown('<div class="preview-frame preview-frame--empty">', unsafe_allow_html=True)
+        st.image(_PREVIEW_PLACEHOLDER, width=420)
+        st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.stop()
 
     img = Image.open(uploaded)
+    st.markdown('<div class="preview-frame preview-frame--photo">', unsafe_allow_html=True)
     st.image(img, width=420)
+    st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
@@ -816,7 +948,11 @@ macros = nutrition_lookup(nutrition_df, final_label, int(portion_g)) if int(port
 with right_col:
     st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
     st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Prediction Results</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">Prediction results</h3>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-hint">Top prediction and confidence for transparency.</p>',
+        unsafe_allow_html=True,
+    )
 
     if "abstain_warning" in locals():
         st.warning(abstain_warning)
@@ -848,8 +984,12 @@ with right_col:
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Nutrition Summary</h3>', unsafe_allow_html=True)
+    st.markdown('<div class="ui-card ui-card--nutrition">', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">Nutrition summary</h3>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-hint">Macros scale from <strong>nutrition.csv</strong> using your portion (g).</p>',
+        unsafe_allow_html=True,
+    )
     st.markdown(f"**Final label used for nutrition:** `{final_label}`")
     st.caption("If the model guessed wrong, pick a better Final label from the left panel.")
 
@@ -873,7 +1013,10 @@ with left_col:
     st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
     st.markdown('<div class="ui-card">', unsafe_allow_html=True)
     st.markdown('<h3 class="card-title">Actions</h3>', unsafe_allow_html=True)
-    st.caption("Prediction runs automatically after upload. Save the meal after reviewing nutrition.")
+    st.markdown(
+        '<p class="section-hint">Analysis runs when you upload. Save after you are happy with nutrition.</p>',
+        unsafe_allow_html=True,
+    )
 
     if st.button("Save Meal", use_container_width=True):
         if int(portion_g) == 0:
@@ -905,7 +1048,11 @@ with left_col:
 # ============================================================
 st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
 st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-st.markdown('<h3 class="card-title">Meal History & Export</h3>', unsafe_allow_html=True)
+st.markdown('<h3 class="card-title">Meal history & export</h3>', unsafe_allow_html=True)
+st.markdown(
+    '<p class="section-hint">Review saved meals and download a CSV for your records.</p>',
+    unsafe_allow_html=True,
+)
 
 hist = st.session_state.history.copy()
 if hist.empty:
