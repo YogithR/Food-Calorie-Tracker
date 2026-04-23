@@ -918,27 +918,23 @@ else:
 if abstain and final_label_choice == "(use top prediction)":
     abstain_warning = "Not sure this is a known food. Please select the correct Final label for nutrition."
 
-# Check if image is actually food
-is_non_food, non_food_reason = is_likely_non_food(top1_conf, top3)
 # ---- Warning for user ----
 if abstain and final_label_choice == "(use top prediction)":
-    abstain_warning = "Not sure this is a known food. Please select the correct Final label for nutrition."
+    abstain_warning = (
+        "Low confidence prediction. Please confirm or correct the **Final label (for nutrition)** "
+        "in the left panel."
+    )
 
 # ============================================================
-# 🚨 CHECK IF IMAGE IS ACTUALLY FOOD (OOD DETECTION)
+# 🚨 FOOD / VISION UNCERTAINTY (soft warnings only — never hard-block the app)
 # ============================================================
+user_chose_label = final_label_choice != "(use top prediction)"
 non_food_by_food101, food101_reason = is_likely_non_food_v2(top1_conf, top3)
 is_food_gate_ok, gate_reason, _ = is_food_image_with_imagenet(img, food_gate_model)
 
-# Mark as non-food if either:
-# 1) Food-101 confidence pattern looks invalid, OR
-# 2) Independent ImageNet gate sees no strong food signal.
-is_non_food = non_food_by_food101 or (not is_food_gate_ok)
-non_food_reason = (
-    f"{food101_reason}. {gate_reason}"
-    if is_non_food
-    else "Food-like image pattern detected."
-)
+# Heuristic uncertainty (Food-101 pattern OR ImageNet food-gate). Used for transparency, not blocking.
+vision_uncertain = non_food_by_food101 or (not is_food_gate_ok)
+uncertain_detail = f"{food101_reason} · {gate_reason}"
 # Only calculate if portion > 0
 macros = nutrition_lookup(nutrition_df, final_label, int(portion_g)) if int(portion_g) > 0 else None
 
@@ -957,21 +953,19 @@ with right_col:
     if "abstain_warning" in locals():
         st.warning(abstain_warning)
 
-    if is_non_food:
-        st.error(f"""
-        🚫 **This doesn't look like food!**
-
-        **Reason:** {non_food_reason}
-
-        **Common causes:**
-        - Not a food item (person, animal, vehicle, object)
-        - Image is too blurry or dark
-        - Food is not clearly visible
-
-        **Please upload a clear photo of a food dish.**
-        """)
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.stop()
+    # Manual final label always wins for nutrition; never stop the run here.
+    if vision_uncertain:
+        if user_chose_label:
+            st.info(
+                "Automated food/vision checks were uncertain; your **selected Final label** is trusted for nutrition."
+            )
+            st.caption(f"Check detail: {uncertain_detail}")
+        else:
+            st.warning(
+                "Low confidence prediction. Please confirm or correct the **Final label (for nutrition)** "
+                "in the left panel, then enter portion grams to see nutrition."
+            )
+            st.caption(f"Check detail: {uncertain_detail}")
 
     pct_val = float(top1_conf) * 100.0
     st.metric("Top Prediction", f"{display_top1_label} ({pct_val:.2f}%)", delta=f"{pct_val:.2f}%")
