@@ -6,6 +6,8 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 import time
+import io
+import base64
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -80,6 +82,26 @@ HISTORY_COLUMNS = [
 _PREVIEW_PLACEHOLDER = np.broadcast_to(
     np.uint8([236, 253, 245]), (280, 440, 3)
 ).copy()
+
+
+def _preview_slot_html(pil_image: Image.Image, kind: str) -> str:
+    """
+    Real <img> inside a styled div. Streamlit does not nest st.image inside
+    st.markdown HTML, so this keeps the preview aligned inside the card frame.
+    kind: 'empty' | 'photo'
+    """
+    buf = io.BytesIO()
+    pil_image.convert("RGB").save(buf, format="PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+    cls = "preview-slot preview-slot--empty" if kind == "empty" else "preview-slot preview-slot--photo"
+    return (
+        f'<div class="{cls}">'
+        f'<img src="data:image/png;base64,{b64}" alt="Meal preview" '
+        'style="max-width:420px;width:100%;height:auto;border-radius:12px;'
+        'display:block;margin:0 auto;box-shadow:0 8px 24px rgba(15,23,42,0.1);" />'
+        "</div>"
+    )
+
 
 # ============================================================
 # 5) UI THEME — forced light appearance (ignore OS / Streamlit dark UI)
@@ -537,28 +559,25 @@ button[role="tab"][aria-selected="true"] {
   border-color: #99f6e4 !important;
 }
 
-/* Image preview frame */
-.preview-frame {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Preview image sits inside this box (HTML img, not st.image sibling bug) */
+.preview-slot {
   border-radius: 16px;
-  padding: 14px;
-  min-height: 200px;
+  padding: 12px 14px 14px 14px;
+  margin: 6px 0 0 0;
   box-sizing: border-box;
+  text-align: center;
 }
-.preview-frame--empty {
+.preview-slot--empty {
   background: linear-gradient(165deg, #ecfdf5 0%, #f8fafc 50%, #fff7ed 100%) !important;
   border: 1px dashed #cbd5e1 !important;
 }
-.preview-frame--photo {
+.preview-slot--photo {
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%) !important;
   border: 1px solid #e2e8f0 !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
-.preview-frame img {
+.preview-slot img {
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
 }
 
 /* Section helper under titles */
@@ -870,16 +889,13 @@ with right_col:
 
     if uploaded is None:
         st.info("Upload an image to start analysis.")
-        st.markdown('<div class="preview-frame preview-frame--empty">', unsafe_allow_html=True)
-        st.image(_PREVIEW_PLACEHOLDER, width=420)
-        st.markdown("</div>", unsafe_allow_html=True)
+        _ph_img = Image.fromarray(_PREVIEW_PLACEHOLDER.astype(np.uint8), mode="RGB")
+        st.markdown(_preview_slot_html(_ph_img, "empty"), unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.stop()
 
     img = Image.open(uploaded)
-    st.markdown('<div class="preview-frame preview-frame--photo">', unsafe_allow_html=True)
-    st.image(img, width=420)
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown(_preview_slot_html(img, "photo"), unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
@@ -895,31 +911,30 @@ else:
     top3 = [(class_names[int(i)], float(preds[int(i)])) for i in idxs]
     top1_label, top1_conf = top3[0]
 
-final_label = top1_label if final_label_choice == "(use top prediction)" else final_label_choice
-
 # ---- Decide abstain (unknown) ----
 abstain = False
 if PREDICT_MODULE_OK:
     abstain = should_abstain(top3, threshold=0.30, margin=0.02)   # start here; tune later
 
+# ImageNet food gate (before final_label): if it fails, do not trust Food-101 top-1 for nutrition on auto mode.
+is_food_gate_ok, gate_reason, _ = is_food_image_with_imagenet(img, food_gate_model)
+user_chose_label = final_label_choice != "(use top prediction)"
+non_food_by_food101, food101_reason = is_likely_non_food_v2(top1_conf, top3)
+vision_uncertain = non_food_by_food101 or (not is_food_gate_ok)
+uncertain_detail = f"{food101_reason} · {gate_reason}"
 
 # ---- What to DISPLAY as prediction ----
 display_top1_label = "unknown" if abstain else top1_label
 
 # ---- What to USE for nutrition ----
-# If user explicitly chose a label in the sidebar, respect it always.
-# If user left "(use top prediction)" but we abstain, do NOT use the model guess.
+# Manual label always wins. On auto: require both model confidence AND food-like vision gate.
 if final_label_choice == "(use top prediction)":
-    final_label = "unknown" if abstain else top1_label
+    final_label = "unknown" if (abstain or not is_food_gate_ok) else top1_label
 else:
     final_label = final_label_choice
 
-# ---- Warning for user ----
-if abstain and final_label_choice == "(use top prediction)":
-    abstain_warning = "Not sure this is a known food. Please select the correct Final label for nutrition."
-
-# ---- Warning for user ----
-if abstain and final_label_choice == "(use top prediction)":
+# ---- Warning for user: model abstain only when vision gate still looks like food (avoid duplicate banners) ----
+if abstain and final_label_choice == "(use top prediction)" and is_food_gate_ok:
     abstain_warning = (
         "Low confidence prediction. Please confirm or correct the **Final label (for nutrition)** "
         "in the left panel."
@@ -928,13 +943,6 @@ if abstain and final_label_choice == "(use top prediction)":
 # ============================================================
 # 🚨 FOOD / VISION UNCERTAINTY (soft warnings only — never hard-block the app)
 # ============================================================
-user_chose_label = final_label_choice != "(use top prediction)"
-non_food_by_food101, food101_reason = is_likely_non_food_v2(top1_conf, top3)
-is_food_gate_ok, gate_reason, _ = is_food_image_with_imagenet(img, food_gate_model)
-
-# Heuristic uncertainty (Food-101 pattern OR ImageNet food-gate). Used for transparency, not blocking.
-vision_uncertain = non_food_by_food101 or (not is_food_gate_ok)
-uncertain_detail = f"{food101_reason} · {gate_reason}"
 # Only calculate if portion > 0
 macros = nutrition_lookup(nutrition_df, final_label, int(portion_g)) if int(portion_g) > 0 else None
 
@@ -969,6 +977,11 @@ with right_col:
 
     pct_val = float(top1_conf) * 100.0
     st.metric("Top Prediction", f"{display_top1_label} ({pct_val:.2f}%)", delta=f"{pct_val:.2f}%")
+    if (not is_food_gate_ok) and (not abstain) and (not user_chose_label):
+        st.caption(
+            "Food-101 must pick one of 101 foods, so non-food images often get a random food name. "
+            "The vision check failed here—choose **Final label (for nutrition)** yourself if this is not food."
+        )
 
     top3_df = pd.DataFrame(
         {"label": [x[0] for x in top3], "confidence": [x[1] for x in top3]}
