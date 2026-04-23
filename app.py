@@ -7,6 +7,7 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 import time
 import io
+import html
 import base64
 import numpy as np
 import pandas as pd
@@ -631,6 +632,35 @@ button[role="tab"][aria-selected="true"] {
   color: #115e59 !important;
   font-weight: 700;
 }
+
+/* Nutrition summary — primary label callout */
+.nutrition-final-label {
+  margin: 4px 0 12px 0;
+  padding: 14px 16px 16px 16px;
+  border-radius: 14px;
+  border: 1px solid #99f6e4;
+  background: linear-gradient(165deg, #ecfdf5 0%, #f0fdfa 45%, #ffffff 100%);
+  box-shadow: 0 2px 12px rgba(15, 118, 110, 0.12);
+}
+.nutrition-final-label__k {
+  display: block;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0f766e !important;
+  margin-bottom: 6px;
+}
+.nutrition-final-label__v {
+  display: block;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em;
+  color: #115e59 !important;
+  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace !important;
+  word-break: break-word;
+}
 </style>
 """,
     unsafe_allow_html=True
@@ -1068,7 +1098,14 @@ with right_col:
             '<p class="section-hint">Macros scale from <strong>nutrition.csv</strong> using your portion (g).</p>',
             unsafe_allow_html=True,
         )
-        st.markdown(f"**Final label used for nutrition:** `{final_label}`")
+        _fl = html.escape(str(final_label))
+        st.markdown(
+            f'<div class="nutrition-final-label" role="status">'
+            f'<span class="nutrition-final-label__k">Final label used for nutrition</span>'
+            f'<span class="nutrition-final-label__v">{_fl}</span>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
         st.caption("If the model guessed wrong, pick a better Final label from the left panel.")
 
         if int(portion_g) == 0:
