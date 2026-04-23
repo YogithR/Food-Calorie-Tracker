@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Nested app (also has its own .gitignore)
+Food-Calorie-Tracker-main/venv/
+Food-Calorie-Tracker-main/__pycache__/
+Food-Calorie-Tracker-main/*.pyc
+Food-Calorie-Tracker-main/.env
+Food-Calorie-Tracker-main/.tfds/
+Food-Calorie-Tracker-main/tensorflow_datasets/
+Food-Calorie-Tracker-main/*.log
