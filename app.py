@@ -329,19 +329,20 @@ section[data-testid="stSidebar"] small {
   letter-spacing: 0.02em;
 }
 
-.ui-card {
+/* Bordered st.container — one visual card around heading + widgets */
+div[data-testid="stVerticalBlockBorderWrapper"] {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
-  border-radius: 18px;
-  padding: 20px;
+  border-radius: 18px !important;
+  padding: 16px 18px 18px 18px !important;
   box-shadow:
     0 1px 3px rgba(15, 23, 42, 0.06),
-    0 14px 36px -16px rgba(15, 23, 42, 0.12);
+    0 14px 36px -16px rgba(15, 23, 42, 0.12) !important;
 }
-.ui-card:hover {
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
   box-shadow:
     0 1px 3px rgba(15, 23, 42, 0.07),
-    0 18px 44px -14px rgba(15, 118, 110, 0.12);
+    0 18px 44px -14px rgba(15, 118, 110, 0.12) !important;
   transition: box-shadow 0.2s ease;
 }
 .card-title {
@@ -398,8 +399,8 @@ div.stDownloadButton > button:hover {
   box-shadow: 0 6px 18px rgba(15, 118, 110, 0.35);
 }
 
-/* Nutrition card — subtle orange accent (not a layout change) */
-.ui-card--nutrition {
+/* Nutrition block — orange left accent (marker only inside that container) */
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.nutrition-section-marker) {
   border-left: 4px solid #f97316 !important;
 }
 
@@ -895,69 +896,66 @@ st.sidebar.info("Main workflow is available in the dashboard.")
 left_col, right_col = st.columns([0.38, 0.62], gap="large")
 
 with left_col:
-    st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Meal inputs</h3>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="section-hint">Portion and labels power nutrition and your saved history.</p>',
-        unsafe_allow_html=True,
-    )
+    with st.container(border=True):
+        st.markdown('<h3 class="card-title">Meal inputs</h3>', unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-hint">Portion and labels power nutrition and your saved history.</p>',
+            unsafe_allow_html=True,
+        )
 
-    uploaded = st.file_uploader(
-        "Upload food image",
-        type=["jpg", "jpeg", "png"],
-        help="Upload a clear photo of a single dish for best results."
-    )
+        uploaded = st.file_uploader(
+            "Upload food image",
+            type=["jpg", "jpeg", "png"],
+            help="Upload a clear photo of a single dish for best results."
+        )
 
-    portion_g = st.number_input(
-        "Estimated portion (grams)",
-        min_value=0,
-        max_value=1000,
-        value=0,
-        step=10,
-        help="Required for nutrition: enter a weight **greater than 0** (e.g. 150–250 g). "
-        "Macros stay hidden at 0 g even if you pick a Final label.",
-    )
+        portion_g = st.number_input(
+            "Estimated portion (grams)",
+            min_value=0,
+            max_value=1000,
+            value=0,
+            step=10,
+            help="Required for nutrition: enter a weight **greater than 0** (e.g. 150–250 g). "
+            "Macros stay hidden at 0 g even if you pick a Final label.",
+        )
 
-    meal_type = st.selectbox(
-        "Meal type",
-        MEAL_TYPES,
-        index=0,
-        help="Pick Breakfast/Lunch/Dinner/Snacks for your history log."
-    )
+        meal_type = st.selectbox(
+            "Meal type",
+            MEAL_TYPES,
+            index=0,
+            help="Pick Breakfast/Lunch/Dinner/Snacks for your history log."
+        )
 
-    all_labels = ["(use top prediction)"] + CUSTOM_LABELS + class_names
-    final_label_choice = st.selectbox(
-        "Final label (for nutrition)",
-        all_labels,
-        index=0,
-        help="Select the closest match for accurate nutrition + saving history."
-    )
+        all_labels = ["(use top prediction)"] + CUSTOM_LABELS + class_names
+        final_label_choice = st.selectbox(
+            "Final label (for nutrition)",
+            all_labels,
+            index=0,
+            help="Select the closest match for accurate nutrition + saving history."
+        )
 
-    notes = st.text_area(
-        "Notes (optional)",
-        placeholder="Example: homemade, less oil, extra chicken",
-        help="Optional notes saved into your meal history."
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
+        notes = st.text_area(
+            "Notes (optional)",
+            placeholder="Example: homemade, less oil, extra chicken",
+            help="Optional notes saved into your meal history."
+        )
 
 with right_col:
-    st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Preview & analysis</h3>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="section-hint">Clear, well-lit photos of a single dish work best.</p>',
-        unsafe_allow_html=True,
-    )
+    with st.container(border=True):
+        st.markdown('<h3 class="card-title">Preview & analysis</h3>', unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-hint">Clear, well-lit photos of a single dish work best.</p>',
+            unsafe_allow_html=True,
+        )
 
-    if uploaded is None:
-        st.info("Upload an image to start analysis.")
-        _ph_img = Image.fromarray(_PREVIEW_PLACEHOLDER.astype(np.uint8), mode="RGB")
-        st.markdown(_preview_slot_html(_ph_img, "empty"), unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.stop()
+        if uploaded is None:
+            st.info("Upload an image to start analysis.")
+            _ph_img = Image.fromarray(_PREVIEW_PLACEHOLDER.astype(np.uint8), mode="RGB")
+            st.markdown(_preview_slot_html(_ph_img, "empty"), unsafe_allow_html=True)
+            st.stop()
 
-    img = Image.open(uploaded)
-    st.markdown(_preview_slot_html(img, "photo"), unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+        img = Image.open(uploaded)
+        st.markdown(_preview_slot_html(img, "photo"), unsafe_allow_html=True)
 
 # ============================================================
 # 13) PREDICTION
@@ -1017,144 +1015,143 @@ macros = nutrition_lookup(nutrition_df, final_label, int(portion_g)) if int(port
 # ============================================================
 with right_col:
     st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Prediction results</h3>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="section-hint">Top prediction and confidence for transparency.</p>',
-        unsafe_allow_html=True,
-    )
-
-    if "abstain_warning" in locals():
-        st.warning(abstain_warning)
-
-    # Manual final label always wins for nutrition; never stop the run here.
-    if vision_uncertain:
-        if user_chose_label:
-            st.info(
-                "Automated food/vision checks were uncertain; your **selected Final label** is trusted for nutrition."
-            )
-            st.caption(f"Check detail: {uncertain_detail}")
-            if int(portion_g) == 0:
-                st.caption(
-                    "Next step: enter **Estimated portion (grams)** (> 0) in **Meal inputs** to show calories and macros."
-                )
-        else:
-            st.warning(
-                "Low confidence prediction. Please confirm or correct the **Final label (for nutrition)** "
-                "in the left panel, then enter portion grams to see nutrition."
-            )
-            st.caption(f"Check detail: {uncertain_detail}")
-
-    pct_val = float(top1_conf) * 100.0
-    st.metric("Top Prediction", f"{display_top1_label} ({pct_val:.2f}%)", delta=f"{pct_val:.2f}%")
-    if (not is_food_gate_ok) and (not abstain) and (not user_chose_label):
-        st.caption(
-            "Food-101 must pick one of 101 foods, so non-food images often get a random food name. "
-            "The vision check failed here—choose **Final label (for nutrition)** yourself if this is not food."
+    with st.container(border=True):
+        st.markdown('<h3 class="card-title">Prediction results</h3>', unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-hint">Top prediction and confidence for transparency.</p>',
+            unsafe_allow_html=True,
         )
 
-    top3_df = pd.DataFrame(
-        {"label": [x[0] for x in top3], "confidence": [x[1] for x in top3]}
-    ).set_index("label")
-    st.write("Top-3 confidence")
-    st.bar_chart(top3_df)
-    st.markdown("</div>", unsafe_allow_html=True)
+        if "abstain_warning" in locals():
+            st.warning(abstain_warning)
+
+        # Manual final label always wins for nutrition; never stop the run here.
+        if vision_uncertain:
+            if user_chose_label:
+                st.info(
+                    "Automated food/vision checks were uncertain; your **selected Final label** is trusted for nutrition."
+                )
+                st.caption(f"Check detail: {uncertain_detail}")
+                if int(portion_g) == 0:
+                    st.caption(
+                        "Next step: enter **Estimated portion (grams)** (> 0) in **Meal inputs** to show calories and macros."
+                    )
+            else:
+                st.warning(
+                    "Low confidence prediction. Please confirm or correct the **Final label (for nutrition)** "
+                    "in the left panel, then enter portion grams to see nutrition."
+                )
+                st.caption(f"Check detail: {uncertain_detail}")
+
+        pct_val = float(top1_conf) * 100.0
+        st.metric("Top Prediction", f"{display_top1_label} ({pct_val:.2f}%)", delta=f"{pct_val:.2f}%")
+        if (not is_food_gate_ok) and (not abstain) and (not user_chose_label):
+            st.caption(
+                "Food-101 must pick one of 101 foods, so non-food images often get a random food name. "
+                "The vision check failed here—choose **Final label (for nutrition)** yourself if this is not food."
+            )
+
+        top3_df = pd.DataFrame(
+            {"label": [x[0] for x in top3], "confidence": [x[1] for x in top3]}
+        ).set_index("label")
+        st.write("Top-3 confidence")
+        st.bar_chart(top3_df)
 
     st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="ui-card ui-card--nutrition">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Nutrition summary</h3>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="section-hint">Macros scale from <strong>nutrition.csv</strong> using your portion (g).</p>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(f"**Final label used for nutrition:** `{final_label}`")
-    st.caption("If the model guessed wrong, pick a better Final label from the left panel.")
+    with st.container(border=True):
+        st.markdown(
+            '<span class="nutrition-section-marker" aria-hidden="true"></span>',
+            unsafe_allow_html=True,
+        )
+        st.markdown('<h3 class="card-title">Nutrition summary</h3>', unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-hint">Macros scale from <strong>nutrition.csv</strong> using your portion (g).</p>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(f"**Final label used for nutrition:** `{final_label}`")
+        st.caption("If the model guessed wrong, pick a better Final label from the left panel.")
 
-    if int(portion_g) == 0:
-        if final_label != "unknown":
-            st.warning(
-                f"**Portion is set to 0 g** — calories and macros are not shown until you enter "
-                f"**Estimated portion (grams)** in **Meal inputs** (try e.g. **200** for a typical piece). "
-                f"Your label **`{final_label}`** is already selected and will be used as soon as portion > 0."
-            )
+        if int(portion_g) == 0:
+            if final_label != "unknown":
+                st.warning(
+                    f"**Portion is set to 0 g** — calories and macros are not shown until you enter "
+                    f"**Estimated portion (grams)** in **Meal inputs** (try e.g. **200** for a typical piece). "
+                    f"Your label **`{final_label}`** is already selected and will be used as soon as portion > 0."
+                )
+            else:
+                st.info(
+                    "Enter **Estimated portion (grams)** in Meal inputs (greater than 0), and pick or confirm a "
+                    "**Final label (for nutrition)** to calculate macros."
+                )
         else:
-            st.info(
-                "Enter **Estimated portion (grams)** in Meal inputs (greater than 0), and pick or confirm a "
-                "**Final label (for nutrition)** to calculate macros."
-            )
-    else:
-        if macros is None:
-            st.warning(f"No nutrition row found for `{final_label}` in nutrition.csv")
-        else:
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Calories", f"{macros['calories']:.0f} kcal" if macros["calories"] is not None else "—")
-            c2.metric("Protein", f"{macros['protein']:.1f} g" if macros["protein"] is not None else "—")
-            c3.metric("Carbs", f"{macros['carbs']:.1f} g" if macros["carbs"] is not None else "—")
-            c4.metric("Fat", f"{macros['fat']:.1f} g" if macros["fat"] is not None else "—")
-            c5, _ = st.columns([1, 3])
-            c5.metric("Fiber", f"{macros['fiber']:.1f} g" if macros["fiber"] is not None else "—")
-            st.caption(f"Portion used: {portion_g}g")
-    st.markdown("</div>", unsafe_allow_html=True)
+            if macros is None:
+                st.warning(f"No nutrition row found for `{final_label}` in nutrition.csv")
+            else:
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("Calories", f"{macros['calories']:.0f} kcal" if macros["calories"] is not None else "—")
+                c2.metric("Protein", f"{macros['protein']:.1f} g" if macros["protein"] is not None else "—")
+                c3.metric("Carbs", f"{macros['carbs']:.1f} g" if macros["carbs"] is not None else "—")
+                c4.metric("Fat", f"{macros['fat']:.1f} g" if macros["fat"] is not None else "—")
+                c5, _ = st.columns([1, 3])
+                c5.metric("Fiber", f"{macros['fiber']:.1f} g" if macros["fiber"] is not None else "—")
+                st.caption(f"Portion used: {portion_g}g")
 
 with left_col:
     st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">Actions</h3>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="section-hint">Analysis runs when you upload. Save after you are happy with nutrition.</p>',
-        unsafe_allow_html=True,
-    )
+    with st.container(border=True):
+        st.markdown('<h3 class="card-title">Actions</h3>', unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-hint">Analysis runs when you upload. Save after you are happy with nutrition.</p>',
+            unsafe_allow_html=True,
+        )
 
-    if st.button("Save Meal", use_container_width=True):
-        if int(portion_g) == 0:
-            st.warning("Portion is 0g. Enter a valid portion before saving.")
-        elif macros is None:
-            st.warning("Nutrition not found for this label. Pick a different Final label before saving.")
-        else:
-            today = time.strftime("%Y-%m-%d")
-            row = {
-                "date": today,
-                "meal_type": meal_type,
-                "final_label": final_label,
-                "portion_g": int(portion_g),
-                "calories": None if macros["calories"] is None else round(macros["calories"], 0),
-                "protein": None if macros["protein"] is None else round(macros["protein"], 1),
-                "carbs": None if macros["carbs"] is None else round(macros["carbs"], 1),
-                "fat": None if macros["fat"] is None else round(macros["fat"], 1),
-                "fiber": None if macros["fiber"] is None else round(macros["fiber"], 1),
-                "notes": notes.strip(),
-            }
-            save_history_row(row)
-            st.session_state.history = pd.concat([pd.DataFrame([row]), st.session_state.history], ignore_index=True)
-            st.success("Saved! Review it in Meal History below.")
-            st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("Save Meal", use_container_width=True):
+            if int(portion_g) == 0:
+                st.warning("Portion is 0g. Enter a valid portion before saving.")
+            elif macros is None:
+                st.warning("Nutrition not found for this label. Pick a different Final label before saving.")
+            else:
+                today = time.strftime("%Y-%m-%d")
+                row = {
+                    "date": today,
+                    "meal_type": meal_type,
+                    "final_label": final_label,
+                    "portion_g": int(portion_g),
+                    "calories": None if macros["calories"] is None else round(macros["calories"], 0),
+                    "protein": None if macros["protein"] is None else round(macros["protein"], 1),
+                    "carbs": None if macros["carbs"] is None else round(macros["carbs"], 1),
+                    "fat": None if macros["fat"] is None else round(macros["fat"], 1),
+                    "fiber": None if macros["fiber"] is None else round(macros["fiber"], 1),
+                    "notes": notes.strip(),
+                }
+                save_history_row(row)
+                st.session_state.history = pd.concat([pd.DataFrame([row]), st.session_state.history], ignore_index=True)
+                st.success("Saved! Review it in Meal History below.")
+                st.rerun()
 
 # ============================================================
 # 15) FULL-WIDTH BOTTOM SECTION (history/export)
 # ============================================================
 st.markdown('<div class="spacer-20"></div>', unsafe_allow_html=True)
-st.markdown('<div class="ui-card">', unsafe_allow_html=True)
-st.markdown('<h3 class="card-title">Meal history & export</h3>', unsafe_allow_html=True)
-st.markdown(
-    '<p class="section-hint">Review saved meals and download a CSV for your records.</p>',
-    unsafe_allow_html=True,
-)
-
-hist = st.session_state.history.copy()
-if hist.empty:
-    st.info("No history yet. Save a meal to see it here.")
-else:
-    st.dataframe(hist, use_container_width=True)
-    csv_bytes = hist.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        "Export history (CSV)",
-        data=csv_bytes,
-        file_name="meal_history.csv",
-        mime="text/csv"
+with st.container(border=True):
+    st.markdown('<h3 class="card-title">Meal history & export</h3>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-hint">Review saved meals and download a CSV for your records.</p>',
+        unsafe_allow_html=True,
     )
 
-st.markdown("</div>", unsafe_allow_html=True)
+    hist = st.session_state.history.copy()
+    if hist.empty:
+        st.info("No history yet. Save a meal to see it here.")
+    else:
+        st.dataframe(hist, use_container_width=True)
+        csv_bytes = hist.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "Export history (CSV)",
+            data=csv_bytes,
+            file_name="meal_history.csv",
+            mime="text/csv"
+        )
 
 st.caption("Note: Calories/macros depend on nutrition.csv values; portion is user-provided.")
 
