@@ -1,5 +1,5 @@
 # app.py
-# MealSnap AI - Streamlit app (V2 logic + OLD color theme restored)
+# MealSnap AI — Streamlit app (forced light UI + existing logic)
 
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -77,95 +77,380 @@ HISTORY_COLUMNS = [
 ]
 
 # ============================================================
-# 5) UI THEME (premium, compact, card-based)
+# 5) UI THEME — forced light appearance (ignore OS / Streamlit dark UI)
 # ============================================================
 st.markdown(
     """
 <style>
-:root{
-  --primary:#0F766E;
-  --accent:#F97316;
-  --bg:#F9FAFB;
-  --card:#FFFFFF;
-  --text:#111827;
-  --muted:#64748B;
-  --border:#E5E7EB;
+/* Design tokens (explicit hex so Streamlit dark theme cannot wash them out) */
+:root {
+  --ms-primary: #0F766E;
+  --ms-accent: #F97316;
+  --ms-bg: #F9FAFB;
+  --ms-card: #FFFFFF;
+  --ms-text: #111827;
+  --ms-muted: #64748B;
+  --ms-border: #E5E7EB;
 }
 
-.stApp{ background: var(--bg) !important; }
-main .block-container{ padding-top: 1.2rem; padding-bottom: 2rem; max-width: 1200px; }
+/* Prefer light rendering where browsers support it */
+html {
+  color-scheme: light !important;
+}
 
-section[data-testid="stSidebar"]{ background: #ffffff !important; border-right: 1px solid var(--border); }
-section[data-testid="stSidebar"] *{ color: var(--muted) !important; }
+/* App shell — always light surfaces */
+html,
+body,
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] > .main,
+section[data-testid="stMain"],
+section[data-testid="stMain"] > div,
+[data-testid="stHeader"] {
+  background-color: #F9FAFB !important;
+  color: #111827 !important;
+}
 
-.app-header{
-  background: var(--card);
-  border: 1px solid var(--border);
+.stApp {
+  background: #F9FAFB !important;
+}
+
+main .block-container {
+  padding-top: 1.2rem;
+  padding-bottom: 2rem;
+  max-width: 1200px;
+  background-color: transparent !important;
+}
+
+/* Main content typography (Streamlit dark theme often forces light text here) */
+section[data-testid="stMain"] h1,
+section[data-testid="stMain"] h2,
+section[data-testid="stMain"] h3,
+section[data-testid="stMain"] h4,
+section[data-testid="stMain"] p,
+section[data-testid="stMain"] label,
+section[data-testid="stMain"] span,
+section[data-testid="stMain"] li,
+div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stMarkdownContainer"] span,
+div[data-testid="stMarkdownContainer"] li,
+div[data-testid="stCaption"] {
+  color: #111827 !important;
+}
+
+section[data-testid="stMain"] small,
+div[data-testid="stCaption"] {
+  color: #64748B !important;
+}
+
+/* Widget labels */
+label[data-testid="stWidgetLabel"] p,
+.stWidget label span,
+.stWidget > label {
+  color: #111827 !important;
+}
+
+/* Sidebar — light card, dark text (no wildcard * color) */
+section[data-testid="stSidebar"] {
+  background-color: #FFFFFF !important;
+  border-right: 1px solid #E5E7EB !important;
+}
+section[data-testid="stSidebar"] .block-container {
+  background-color: #FFFFFF !important;
+}
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] small,
+section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] {
+  color: #111827 !important;
+}
+section[data-testid="stSidebar"] small {
+  color: #64748B !important;
+}
+
+/* Custom header HTML — lock contrast */
+.app-header,
+.app-header *:not(.brand-icon):not(.feature-badge) {
+  color: #111827 !important;
+}
+.app-header .brand-sub {
+  color: #64748B !important;
+}
+.app-header .brand-title {
+  color: #111827 !important;
+}
+.app-header .feature-badge {
+  color: #0F766E !important;
+  background: #ecfeff !important;
+  border-color: #c7f2ef !important;
+}
+
+.app-header {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
   border-radius: 16px;
   padding: 14px 18px;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
   margin-bottom: 22px;
 }
-.header-row{ display:flex; align-items:center; justify-content:space-between; gap: 10px; flex-wrap: wrap; }
-.brand{ display:flex; align-items:center; gap: 12px; }
-.brand-icon{
-  width: 42px; height: 42px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary) 0%, #115e59 100%);
-  display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px;
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
-.brand-title{ margin:0; color:var(--text); font-size: 1.38rem; font-weight: 800; line-height: 1.2; }
-.brand-sub{ margin:2px 0 0 0; color: var(--muted); font-size: 0.92rem; }
-.badge-wrap{ display:flex; gap:8px; flex-wrap: wrap; }
-.feature-badge{
-  padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700;
-  color: var(--primary); background: #ecfeff; border: 1px solid #c7f2ef;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0F766E 0%, #115e59 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff !important;
+  font-size: 22px;
+}
+.badge-wrap {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.feature-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
-.ui-card{
-  background: var(--card);
-  border: 1px solid var(--border);
+.ui-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
-.card-title{ margin: 0 0 12px 0; color: var(--text); font-size: 1.02rem; font-weight: 800; }
-.muted{ color: var(--muted); font-size: 0.9rem; }
+.card-title {
+  margin: 0 0 12px 0;
+  color: #111827 !important;
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+.muted {
+  color: #64748B !important;
+  font-size: 0.9rem;
+}
 
-div[data-testid="stVerticalBlock"] > div:has(.spacer-20){ margin-top: 20px; }
+div[data-testid="stVerticalBlock"] > div:has(.spacer-20) {
+  margin-top: 20px;
+}
 
-div[data-testid="stMetric"]{
-  background: #f8fafc;
-  border: 1px solid var(--border);
+/* Metrics */
+div[data-testid="stMetric"] {
+  background: #f8fafc !important;
+  border: 1px solid #E5E7EB !important;
   border-radius: 14px;
   padding: 12px;
 }
-div[data-testid="stMetric"] label, div[data-testid="stMetric"] *{
-  color: var(--text) !important;
+div[data-testid="stMetric"] label,
+div[data-testid="stMetric"] div[data-testid="stMetricValue"],
+div[data-testid="stMetric"] div[data-testid="stMetricLabel"],
+div[data-testid="stMetric"] div[data-testid="stMetricDelta"] {
+  color: #111827 !important;
 }
 
-button[kind="primary"], div.stButton > button, div.stDownloadButton > button{
-  background: var(--primary) !important;
+/* Primary actions — white label on teal */
+button[kind="primary"],
+div.stButton > button,
+div.stDownloadButton > button {
+  background: #0F766E !important;
   color: #ffffff !important;
-  border: 1px solid rgba(0,0,0,0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
   border-radius: 12px !important;
   font-weight: 700 !important;
 }
-div.stButton > button:hover, div.stDownloadButton > button:hover{
+div.stButton > button:hover,
+div.stDownloadButton > button:hover {
   filter: brightness(0.95);
 }
 
-div[data-baseweb="select"] > div,
+/* ----- Widget shells (Streamlit wraps Base Web in data-testid blocks) ----- */
+div[data-testid="stTextInput"],
+div[data-testid="stTextInput"] > div,
+div[data-testid="stTextInput"] [data-baseweb="input"],
+div[data-testid="stTextInput"] [data-baseweb="base-input"],
+div[data-testid="stTextInput"] [data-baseweb="base-input"] > div {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+
+div[data-testid="stTextArea"],
+div[data-testid="stTextArea"] > div,
+div[data-testid="stTextArea"] [data-baseweb="textarea"],
+div[data-testid="stTextArea"] [data-baseweb="base-input"],
+div[data-testid="stTextArea"] [data-baseweb="base-input"] > div {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+
+div[data-testid="stNumberInput"],
+div[data-testid="stNumberInput"] > div,
+div[data-testid="stNumberInput"] [data-baseweb="input"],
+div[data-testid="stNumberInput"] [data-baseweb="base-input"],
+div[data-testid="stNumberInput"] [data-baseweb="base-input"] > div {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+
+div[data-testid="stSelectbox"],
+div[data-testid="stSelectbox"] > div,
+div[data-testid="stSelectbox"] [data-baseweb="select"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+div[data-testid="stFileUploader"],
+div[data-testid="stFileUploader"] > div,
+div[data-testid="stFileUploader"] section,
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Base Web primitives (used inside many widgets) */
+div[data-baseweb="input"],
+div[data-baseweb="textarea"],
+div[data-baseweb="base-input"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Inputs — always light field, dark text */
 .stTextArea textarea,
 .stNumberInput input,
 .stTextInput input,
-div[data-testid="stFileUploader"] > div{
+textarea,
+input[type="text"],
+input[type="number"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827 !important;
   border-radius: 12px !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid #E5E7EB !important;
 }
 
-button[role="tab"]{
+.stTextArea textarea::placeholder,
+.stTextInput input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: #64748B !important;
+  -webkit-text-fill-color: #64748B !important;
+  opacity: 1 !important;
+}
+
+/* Number input steppers */
+div[data-testid="stNumberInput"] button {
+  background-color: #f8fafc !important;
+  color: #111827 !important;
+  border: 1px solid #E5E7EB !important;
+}
+div[data-testid="stNumberInput"] button:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Selectbox closed control + inner value row */
+div[data-baseweb="select"] > div,
+div[data-baseweb="select"] [role="combobox"],
+div[data-baseweb="select"] [aria-selected="true"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] div[role="combobox"],
+div[data-baseweb="select"] p {
+  color: #111827 !important;
+}
+
+/* Dropdown / listbox — light surface, dark options */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+div[role="listbox"],
+ul[role="listbox"] {
+  background-color: #ffffff !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12) !important;
+  color: #111827 !important;
+}
+div[data-baseweb="popover"] li,
+div[role="option"],
+li[role="option"] {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+}
+div[data-baseweb="popover"] li:hover,
+div[role="option"]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* File uploader — all nested text + controls */
+section[data-testid="stFileUploaderDropzone"],
+section[data-testid="stFileUploaderDropzone"] > div,
+div[data-testid="stFileUploader"] > div,
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"],
+div[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"] * {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+div[data-testid="stFileUploader"] small,
+div[data-testid="stFileUploader"] p,
+div[data-testid="stFileUploader"] span,
+div[data-testid="stFileUploader"] label,
+div[data-testid="stFileUploader"] button {
+  color: #111827 !important;
+}
+div[data-testid="stFileUploader"] button {
+  background-color: #f8fafc !important;
+  border: 1px solid #E5E7EB !important;
+}
+div[data-testid="stFileUploader"] button:hover {
+  background-color: #f1f5f9 !important;
+}
+div[data-testid="stFileUploader"] div[role="presentation"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Alerts / info — keep Streamlit semantics but ensure body text is dark on light panels */
+div[data-testid="stAlert"] p,
+div[data-testid="stAlert"] div {
+  color: #111827 !important;
+}
+
+/* Expander / divider labels if present */
+.streamlit-expanderHeader {
+  color: #111827 !important;
+}
+
+button[role="tab"] {
   border-radius: 10px !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid #E5E7EB !important;
+  color: #111827 !important;
+  background-color: #ffffff !important;
+}
+button[role="tab"][aria-selected="true"] {
+  background-color: #ecfeff !important;
+  color: #0f766e !important;
 }
 </style>
 """,
