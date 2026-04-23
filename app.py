@@ -914,7 +914,8 @@ with left_col:
         max_value=1000,
         value=0,
         step=10,
-        help="Type grams directly (0–1000)."
+        help="Required for nutrition: enter a weight **greater than 0** (e.g. 150–250 g). "
+        "Macros stay hidden at 0 g even if you pick a Final label.",
     )
 
     meal_type = st.selectbox(
@@ -1033,6 +1034,10 @@ with right_col:
                 "Automated food/vision checks were uncertain; your **selected Final label** is trusted for nutrition."
             )
             st.caption(f"Check detail: {uncertain_detail}")
+            if int(portion_g) == 0:
+                st.caption(
+                    "Next step: enter **Estimated portion (grams)** (> 0) in **Meal inputs** to show calories and macros."
+                )
         else:
             st.warning(
                 "Low confidence prediction. Please confirm or correct the **Final label (for nutrition)** "
@@ -1066,7 +1071,17 @@ with right_col:
     st.caption("If the model guessed wrong, pick a better Final label from the left panel.")
 
     if int(portion_g) == 0:
-        st.info("Enter portion grams (0–1000) to calculate nutrition.")
+        if final_label != "unknown":
+            st.warning(
+                f"**Portion is set to 0 g** — calories and macros are not shown until you enter "
+                f"**Estimated portion (grams)** in **Meal inputs** (try e.g. **200** for a typical piece). "
+                f"Your label **`{final_label}`** is already selected and will be used as soon as portion > 0."
+            )
+        else:
+            st.info(
+                "Enter **Estimated portion (grams)** in Meal inputs (greater than 0), and pick or confirm a "
+                "**Final label (for nutrition)** to calculate macros."
+            )
     else:
         if macros is None:
             st.warning(f"No nutrition row found for `{final_label}` in nutrition.csv")
