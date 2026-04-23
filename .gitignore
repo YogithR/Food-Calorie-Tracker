@@ -5,7 +5,7 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Python (repo root or nested app folder)
+# Python
 venv/
 __pycache__/
 *.pyc
@@ -13,12 +13,3 @@ __pycache__/
 .tfds/
 tensorflow_datasets/
 *.log
-
-# Nested app copy under Food-Calorie-Tracker-main/
-Food-Calorie-Tracker-main/venv/
-Food-Calorie-Tracker-main/__pycache__/
-Food-Calorie-Tracker-main/*.pyc
-Food-Calorie-Tracker-main/.env
-Food-Calorie-Tracker-main/.tfds/
-Food-Calorie-Tracker-main/tensorflow_datasets/
-Food-Calorie-Tracker-main/*.log
